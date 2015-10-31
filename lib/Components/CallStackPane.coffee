@@ -3,7 +3,7 @@ Promise = require 'bluebird'
 hg = require 'mercury'
 fs = require 'fs'
 {EventEmitter} = require 'events'
-
+path = require 'path'
 
 #######################################
 
@@ -95,8 +95,9 @@ exports.create = (_debugger) ->
 
     frame: (frame) ->
       log "builder.frame #{frame.script.name}, #{frame.script.line}"
+      scriptPath = path.relative(_debugger.process.cwd,frame.script.name)
       return TreeView(
-          "#{frame.script.name}:#{frame.line + 1}",
+          "#{scriptPath}:#{frame.line + 1}",
           (() =>
             Promise.resolve([
               TreeView("arguments", (() => Promise.resolve(frame.arguments).map(builder.value)))

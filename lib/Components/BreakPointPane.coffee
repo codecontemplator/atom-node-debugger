@@ -1,6 +1,7 @@
 hg = require 'mercury'
 Promise = require 'bluebird'
 {h} = hg
+path = require('path')
 
 log = (msg) -> #console.log(msg)
 
@@ -36,7 +37,8 @@ exports.create = (_debugger) ->
 
     breakpoint: (breakpoint) ->
       log "builder.breakpoint"
-      TreeViewItem("#{breakpoint.script.name} : (#{breakpoint.line + 1})", handlers: { click: () -> gotoBreakpoint(breakpoint) })
+      scriptPath = path.relative(_debugger.process.cwd,breakpoint.script.name)
+      TreeViewItem("#{scriptPath} : (#{breakpoint.line + 1})", handlers: { click: () -> gotoBreakpoint(breakpoint) })
 
     root: () ->
       TreeView("Breakpoints", (() -> builder.listBreakpoints().map(builder.breakpoint)), isRoot: true)
