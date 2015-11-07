@@ -122,7 +122,7 @@ class BreakpointManager extends EventEmitter
     @debugger.on 'connected', ->
       self.client = self.debugger.client
       log "BreakpointManager.connected #{@client}"
-      @attachBreakpoint breakpoint for breakpoint in self.breakpoints
+      self.attachBreakpoint breakpoint for breakpoint in self.breakpoints
     @debugger.on 'disconnected', ->
       log "BreakpointManager.disconnected"
       self.client = null
@@ -132,9 +132,9 @@ class BreakpointManager extends EventEmitter
 
   toggleBreakpoint: (editor, script, line) ->
     log "BreakpointManager.toggleBreakpoint #{script}, #{line}"
-    {breakpoint, index} = @tryFindBreakpoint script, line
-    if breakpoint
-      @removeBreakpoint breakpoint, index
+    maybeBreakpoint = @tryFindBreakpoint script, line
+    if maybeBreakpoint
+      @removeBreakpoint maybeBreakpoint.breakpoint, maybeBreakpoint.index
     else
       @addBreakpoint editor, script, line
 
@@ -191,7 +191,7 @@ class BreakpointManager extends EventEmitter
         resolve()
 
   tryFindBreakpoint: (script, line) ->
-    { breakpoint: breakpoint, index: i } for breakpoint, i in @breakpoints when breakpoint.script is script and breakpoint.line is line
+    return { breakpoint: breakpoint, index: i } for breakpoint, i in @breakpoints when breakpoint.script is script and breakpoint.line is line
 
   getBreakpoints: () -> return @breakpoints
 
