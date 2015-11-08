@@ -187,18 +187,15 @@ class BreakpointManager extends EventEmitter
     new Promise (resolve, reject) ->
       id = breakpoint.id
       breakpoint.id = null
+      breakpoint.marker.destroy()
+      breakpoint.marker = null
       return resolve() unless self.client
       return resolve() unless id
       log "BreakpointManager.detachBreakpoint - client request"
       self.client.clearBreakpoint {
         breakpoint: id
       }, (err) ->
-        switch reason
-          when 'removed'
-            breakpoint.marker.destroy()
-            breakpoint.marker = null
-          else
-            self.decorateBreakpoint breakpoint
+         self.decorateBreakpoint breakpoint unless reason is 'removed'
         resolve()
 
   tryFindBreakpoint: (script, line) ->
