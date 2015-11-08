@@ -126,7 +126,9 @@ class BreakpointManager extends EventEmitter
     @debugger.on 'disconnected', ->
       log "BreakpointManager.disconnected"
       self.client = null
-      breakpoint.id = null for breakpoint in self.breakpoints
+      for breakpoint in self.breakpoints
+        breakpoint.id = null
+        self.decorateBreakpoint breakpoint
     @onAddBreakpointEvent = Event()
     @onRemoveBreakpointEvent = Event()
 
@@ -141,22 +143,24 @@ class BreakpointManager extends EventEmitter
   removeBreakpoint: (breakpoint, index) ->
     log "BreakpointManager.removeBreakpoint #{index}"
     @breakpoints.splice index, 1
-    breakpoint.marker.destroy()
     @onRemoveBreakpointEvent.broadcast breakpoint
     @detachBreakpoint breakpoint
+    breakpoint.marker.destroy()
+    breakpoint.marker = null
 
   addBreakpoint: (editor, script, line) ->
     log "BreakpointManager.addBreakpoint #{script}, #{line}"
-    marker = editor.markBufferPosition([line, 0], invalidate: 'never')
-    editor.decorateMarker(marker, type: 'line-number', class: 'node-debugger-breakpoint')
-    log "BreakpointManager.addBreakpoint marker set"
     breakpoint =
       script: script
       line: line
-      marker: marker
+      marker: null
+      editor: editor
       id: null
+    log "BreakpointManager.addBreakpoint - adding to list"
     @breakpoints.push breakpoint
-    log "BreakpointManager.addBreakpoint num breakpoints=#{@breakpoints.length}"
+    log "BreakpointManager.addBreakpoint - adding default decoration"
+    @decorateBreakpoint breakpoint
+    log "BreakpointManager.addBreakpoint - publishing event, num breakpoints=#{@breakpoints.length}"
     @onAddBreakpointEvent.broadcast breakpoint
     @attachBreakpoint breakpoint
 
@@ -164,9 +168,8 @@ class BreakpointManager extends EventEmitter
     log "BreakpointManager.attachBreakpoint"
     self = this
     new Promise (resolve, reject) ->
-      log "BreakpointManager.attachBreakpoint - Promise"
       return resolve() unless self.client
-      log "BreakpointManager.attachBreakpoint - Promise 2"
+      log "BreakpointManager.attachBreakpoint - client request"
       self.client.setBreakpoint {
         type: 'script'
         target: breakpoint.script
@@ -176,22 +179,33 @@ class BreakpointManager extends EventEmitter
         log "BreakpointManager.attachBreakpoint - done"
         return reject(err) if err
         breakpoint.id = res.breakpoint
+        self.decorateBreakpoint breakpoint
         resolve(breakpoint)
 
   detachBreakpoint: (breakpoint) ->
+    log "BreakpointManager.detachBreakpoint"
     self = this
     new Promise (resolve, reject) ->
       id = breakpoint.id
       breakpoint.id = null
       return resolve() unless self.client
       return resolve() unless id
+      log "BreakpointManager.detachBreakpoint - client request"
       self.client.clearBreakpoint {
         breakpoint: id
       }, (err) ->
+        self.decorateBreakpoint breakpoint
         resolve()
 
   tryFindBreakpoint: (script, line) ->
     return { breakpoint: breakpoint, index: i } for breakpoint, i in @breakpoints when breakpoint.script is script and breakpoint.line is line
+
+  decorateBreakpoint: (breakpoint) ->
+    log "BreakpointManager.decorateBreakpoint - #{breakpoint.marker is null}"
+    breakpoint.marker.destroy() if breakpoint.marker
+    breakpoint.marker = breakpoint.editor.markBufferPosition([breakpoint.line, 0], invalidate: 'never')
+    className = if breakpoint.id then 'node-debugger-attached-breakpoint' else 'node-debugger-detached-breakpoint'
+    breakpoint.editor.decorateMarker(breakpoint.marker, type: 'line-number', class: className)
 
 class Debugger extends EventEmitter
   constructor: (@atom, @processManager)->
@@ -208,9 +222,6 @@ class Debugger extends EventEmitter
   stopRetrying: ->
     return unless @timeout?
     clearTimeout @timeout
-
-  listBreakpoints: ->
-    Promise.resolve([])
 
   step: (type, count) ->
     self = this
