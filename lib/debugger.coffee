@@ -144,9 +144,7 @@ class BreakpointManager extends EventEmitter
     log "BreakpointManager.removeBreakpoint #{index}"
     @breakpoints.splice index, 1
     @onRemoveBreakpointEvent.broadcast breakpoint
-    @detachBreakpoint breakpoint
-    breakpoint.marker.destroy()
-    breakpoint.marker = null
+    @detachBreakpoint breakpoint, 'removed'
 
   addBreakpoint: (editor, script, line) ->
     log "BreakpointManager.addBreakpoint #{script}, #{line}"
@@ -162,6 +160,7 @@ class BreakpointManager extends EventEmitter
     @decorateBreakpoint breakpoint
     log "BreakpointManager.addBreakpoint - publishing event, num breakpoints=#{@breakpoints.length}"
     @onAddBreakpointEvent.broadcast breakpoint
+    log "BreakpointManager.addBreakpoint - attaching"
     @attachBreakpoint breakpoint
 
   attachBreakpoint: (breakpoint) ->
@@ -182,7 +181,7 @@ class BreakpointManager extends EventEmitter
         self.decorateBreakpoint breakpoint
         resolve(breakpoint)
 
-  detachBreakpoint: (breakpoint) ->
+  detachBreakpoint: (breakpoint, reason) ->
     log "BreakpointManager.detachBreakpoint"
     self = this
     new Promise (resolve, reject) ->
@@ -194,7 +193,12 @@ class BreakpointManager extends EventEmitter
       self.client.clearBreakpoint {
         breakpoint: id
       }, (err) ->
-        self.decorateBreakpoint breakpoint
+        switch reason
+          when 'removed'
+            breakpoint.marker.destroy()
+            breakpoint.marker = null
+          else
+            self.decorateBreakpoint breakpoint
         resolve()
 
   tryFindBreakpoint: (script, line) ->
