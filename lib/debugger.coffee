@@ -63,7 +63,7 @@ class ProcessManager extends EventEmitter
         @process.stderr.on 'end', () ->
           logger.info 'child_process', 'end error'
 
-        @emit 'procssCreated', @process
+        @emit 'processCreated', @process
 
         @process.once 'error', (err) =>
           switch err.code
@@ -220,7 +220,7 @@ class Debugger extends EventEmitter
     @onBreak = @onBreakEvent.listen
     @onAddBreakpoint = @breakpointManager.onAddBreakpointEvent.listen
     @onRemoveBreakpoint = @breakpointManager.onRemoveBreakpointEvent.listen
-    @processManager.on 'procssCreated', @start
+    @processManager.on 'processCreated', @start
     @processManager.on 'processEnd', @cleanup
 
   stopRetrying: ->
