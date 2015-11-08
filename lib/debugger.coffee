@@ -8,7 +8,7 @@ childprocess = require 'child_process'
 Event = require 'geval/event'
 logger = require './logger'
 
-log = (msg) -> console.log(msg)
+log = (msg) -> #console.log(msg)
 
 class ProcessManager extends EventEmitter
   constructor: (@atom = atom)->

@@ -2,7 +2,7 @@ hg = require 'mercury'
 Promise = require 'bluebird'
 {h} = hg
 
-log = (msg) -> console.log(msg)
+log = (msg) -> #console.log(msg)
 
 {TreeView, TreeViewItem} = require './TreeView'
 
