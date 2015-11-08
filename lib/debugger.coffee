@@ -170,7 +170,7 @@ class BreakpointManager extends EventEmitter
       self.client.setBreakpoint {
         type: 'script'
         target: breakpoint.script
-        line: breakpoint.line-1
+        line: breakpoint.line
         condition: breakpoint.condition
       }, (err, res) ->
         log "BreakpointManager.attachBreakpoint - done"
@@ -192,8 +192,6 @@ class BreakpointManager extends EventEmitter
 
   tryFindBreakpoint: (script, line) ->
     return { breakpoint: breakpoint, index: i } for breakpoint, i in @breakpoints when breakpoint.script is script and breakpoint.line is line
-
-  getBreakpoints: () -> return @breakpoints
 
 class Debugger extends EventEmitter
   constructor: (@atom, @processManager)->
