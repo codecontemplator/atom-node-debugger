@@ -1,6 +1,7 @@
 hg = require 'mercury'
 Promise = require 'bluebird'
 {h} = hg
+PathEx = require '../Utils/pathex'
 
 log = (msg) -> #console.log(msg)
 
@@ -23,7 +24,8 @@ exports.create = (_debugger) ->
 
     breakpoint: (breakpoint) ->
       log "builder.breakpoint"
-      TreeViewItem("#{breakpoint.script} : (#{breakpoint.line+1})", handlers: { click: () -> gotoBreakpoint(breakpoint) })
+      relativePath = PathEx.projectRelativeFilename breakpoint.script
+      TreeViewItem("#{relativePath} : (#{breakpoint.line+1})", handlers: { click: () -> gotoBreakpoint(breakpoint) })
 
     root: () ->
       TreeView("Breakpoints", (() -> builder.listBreakpoints().map(builder.breakpoint)), isRoot: true)

@@ -1,4 +1,4 @@
-{EventEmitter} = require '../../lib/eventing'
+{EventEmitter} = require '../../lib/Utils/eventsex'
 
 class TestEmitter extends EventEmitter
   emitTestEvent: ->

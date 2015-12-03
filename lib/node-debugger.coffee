@@ -2,7 +2,7 @@ NodeDebuggerView = require './node-debugger-view'
 {CompositeDisposable} = require 'atom'
 {Debugger, ProcessManager} = require './debugger'
 jumpToBreakpoint = require './jump-to-breakpoint'
-logger = require './logger'
+logger = require './Utils/logger'
 os = require 'os'
 
 processManager = null

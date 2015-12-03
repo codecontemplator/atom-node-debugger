@@ -7,7 +7,7 @@ callstackPaneModule = require './CallStackPane'
 consolePane = require './ConsolePane'
 cancelButton = require './CancelButton'
 dragHandler = require './drag-handler'
-logger = require '../logger'
+logger = require '../Utils/logger'
 
 StepButton = null
 BreakPointPane = null

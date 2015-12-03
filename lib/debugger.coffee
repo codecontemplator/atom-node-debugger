@@ -4,9 +4,9 @@ kill = require 'tree-kill'
 Promise = require 'bluebird'
 {Client} = require '_debugger'
 childprocess = require 'child_process'
-{EventEmitter} = require './eventing'
+{EventEmitter} = require './Utils/eventsex'
 Event = require 'geval/event'
-logger = require './logger'
+logger = require './Utils/logger'
 
 log = (msg) -> # console.log(msg)
 

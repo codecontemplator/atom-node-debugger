@@ -2,8 +2,8 @@ Promise = require 'bluebird'
 {TreeView, TreeViewItem} = require './TreeView'
 hg = require 'mercury'
 fs = require 'fs'
-{EventEmitter} = require 'events'
-
+{EventEmitter} = require '../Utils/eventsex'
+PathEx = require '../Utils/pathex'
 
 #######################################
 
@@ -95,8 +95,9 @@ exports.create = (_debugger) ->
 
     frame: (frame) ->
       log "builder.frame #{frame.script.name}, #{frame.script.line}"
+      relativeName = PathEx.projectRelativeFilename frame.script.name
       return TreeView(
-          "#{frame.script.name}:#{frame.line + 1}",
+          "#{relativeName}:#{frame.line + 1}",
           (() =>
             Promise.resolve([
               TreeView("arguments", (() => Promise.resolve(frame.arguments).map(builder.value)))
